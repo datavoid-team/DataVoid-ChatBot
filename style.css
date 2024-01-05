@@ -22,7 +22,7 @@
 .powered {
 /* Add a top border for separation */
  /* Add padding to the top */
-background: linear-gradient(90deg, hsla(213, 77%, 14%, 1) 0%, hsla(202, 27%, 45%, 1) 100%);
+background: linear-gradient(90deg, hsla(205, 46%, 10%, 1) 0%, hsla(191, 28%, 23%, 1) 50%, hsla(207, 41%, 27%, 1) 100%);
     /* Set a background color for better visibility */
 }
 ::-webkit-scrollbar {
@@ -689,7 +689,7 @@ video {
 .bg-gemLight {
   /*--tw-bg-opacity: 1;
   background-color: rgb(35 71 70 / var(--tw-bg-opacity));*/
-background: linear-gradient(90deg, hsla(213, 77%, 14%, 1) 0%, hsla(202, 27%, 45%, 1) 100%); /* Use rgba for a semi-transparent background color and add a background image if desired */
+background: linear-gradient(90deg, hsla(205, 46%, 10%, 1) 0%, hsla(191, 28%, 23%, 1) 50%, hsla(207, 41%, 27%, 1) 100%); /* Use rgba for a semi-transparent background color and add a background image if desired */
   background-blur: 10px;
 }
 
