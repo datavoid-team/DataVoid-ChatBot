@@ -39,7 +39,7 @@ export const userDiv = (data) => {
 export const aiDiv = (data) => {
   return `
   <!-- AI Chat -->
-          <div class="flex gap-2 justify-end">
+          <div class="gap-2 justify-end">
             <pre class="bg-gemRegular/40 text-gemDeep p-1 rounded-md shadow-md whitespace-pre-wrap">
               ${data}
             </pre>
@@ -47,6 +47,7 @@ export const aiDiv = (data) => {
               src="chat-bot.jpg"
               alt="user icon"
               class="w-10 h-10 rounded-full"
+              style="float: right;"
             />
           </div>
   `;

@@ -1,7 +1,50 @@
 /*
 ! tailwindcss v3.3.6 | MIT License | https://tailwindcss.com
 */
+@media only screen and (max-width: 600px) {
+    /* Adjust the max-width and other styles as needed for smaller screens */
+    .flex-container {
+      flex-direction: column; /* Stack elements vertically on small screens */
+    }
 
+    .pre-container {
+      overflow-x: auto; /* Enable horizontal scrolling for small screens */
+    }
+  }
+.powered {
+  font-size: 12px; /* Adjust the font size */
+  color: #777; /* Set the color to a muted or grayish tone */
+  text-align: center; /* Center the text */
+ /* Add some top margin for spacing */
+}
+
+/* Optionally, you can style it further by adding a border or background */
+.powered {
+/* Add a top border for separation */
+ /* Add padding to the top */
+background: linear-gradient(90deg, hsla(205, 46%, 10%, 1) 0%, hsla(191, 28%, 23%, 1) 50%, hsla(207, 41%, 27%, 1) 100%);
+    /* Set a background color for better visibility */
+}
+::-webkit-scrollbar {
+  width: 20px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  /*box-shadow: inset 0 0 5px grey;*/
+  background:linear-gradient(90deg, hsla(205, 46%, 10%, 1) 0%, hsla(191, 28%, 23%, 1) 50%, hsla(207, 41%, 27%, 1) 100%);
+  /*border-radius: 10px;*/
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+background: linear-gradient(81deg, rgba(2,0,36,1) 0%, rgba(0,0,204,1) 100%);
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+background: linear-gradient(81deg, rgba(0,0,203,1) 0%, rgba(2,0,36,1) 100%); }
 /*
 1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
 2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
@@ -138,6 +181,7 @@ pre {
   font-variation-settings: normal;
   /* 3 */
   font-size: 1em;
+    overflow-x: auto;
   /* 4 */
 }
 
@@ -207,7 +251,8 @@ textarea {
   /* 1 */
   line-height: inherit;
   /* 1 */
-  color: inherit;
+  color: #ffffff;
+  background-color: #0e0c24;
   /* 1 */
   margin: 0;
   /* 2 */
@@ -642,22 +687,24 @@ video {
 }
 
 .bg-gemLight {
-  --tw-bg-opacity: 1;
-  background-color: rgb(181 252 250 / var(--tw-bg-opacity));
+  /*--tw-bg-opacity: 1;
+  background-color: rgb(35 71 70 / var(--tw-bg-opacity));*/
+background: linear-gradient(90deg, hsla(205, 46%, 10%, 1) 0%, hsla(191, 28%, 23%, 1) 50%, hsla(207, 41%, 27%, 1) 100%); /* Use rgba for a semi-transparent background color and add a background image if desired */
+  background-blur: 10px;
 }
 
 .bg-gemRegular {
   --tw-bg-opacity: 1;
-  background-color: rgb(19 162 156 / var(--tw-bg-opacity));
+  background-color: rgb(6 12 56 / var(--tw-bg-opacity));
 }
 
 .bg-gemDeep {
   --tw-bg-opacity: 1;
-  background-color: rgb(4 21 106 / var(--tw-bg-opacity));
+  background-color: rgb(3 1 54/ var(--tw-bg-opacity));
 }
 
 .bg-gemRegular\/40 {
-  background-color: rgb(161 217 155 / 0.4);
+  background-color: rgb(6 12 56 / 0.4);
 }
 
 .p-3 {
@@ -697,7 +744,7 @@ video {
 
 .text-gemDeep {
   --tw-text-opacity: 1;
-  color: rgb(4 21 106 / var(--tw-text-opacity));
+  color: rgb(188 198 245 / var(--tw-text-opacity));
 }
 
 .text-white {
@@ -716,7 +763,7 @@ video {
   outline-offset: 2px;
 }
 .dvwell {
-  background-color: #3498db;
+  background-color: #060c38;
   color: #ffffff;
   padding: 20px;
   border-radius: 8px;
