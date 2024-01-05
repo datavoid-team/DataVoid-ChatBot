@@ -572,7 +572,7 @@ video {
 }
 
 .flex {
-  /*display: flex;*/
+  display: flex;
 }
 
 .h-10 {
