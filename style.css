@@ -643,21 +643,21 @@ video {
 
 .bg-gemLight {
   --tw-bg-opacity: 1;
-  background-color: rgb(181 252 250 / var(--tw-bg-opacity));
+  background-color: rgb(35 71 70 / var(--tw-bg-opacity));
 }
 
 .bg-gemRegular {
   --tw-bg-opacity: 1;
-  background-color: rgb(19 162 156 / var(--tw-bg-opacity));
+  background-color: rgb(6 12 56 / var(--tw-bg-opacity));
 }
 
 .bg-gemDeep {
   --tw-bg-opacity: 1;
-  background-color: rgb(4 21 106 / var(--tw-bg-opacity));
+  background-color: rgb(3 1 54/ var(--tw-bg-opacity));
 }
 
 .bg-gemRegular\/40 {
-  background-color: rgb(161 217 155 / 0.4);
+  background-color: rgb(6 12 56 / 0.4);
 }
 
 .p-3 {
@@ -697,7 +697,7 @@ video {
 
 .text-gemDeep {
   --tw-text-opacity: 1;
-  color: rgb(4 21 106 / var(--tw-text-opacity));
+  color: rgb(188 198 245 / var(--tw-text-opacity));
 }
 
 .text-white {
