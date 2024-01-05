@@ -1,6 +1,16 @@
 /*
 ! tailwindcss v3.3.6 | MIT License | https://tailwindcss.com
 */
+@media only screen and (max-width: 600px) {
+    /* Adjust the max-width and other styles as needed for smaller screens */
+    .flex-container {
+      flex-direction: column; /* Stack elements vertically on small screens */
+    }
+
+    .pre-container {
+      overflow-x: auto; /* Enable horizontal scrolling for small screens */
+    }
+  }
 ::-webkit-scrollbar {
   width: 20px;
 }
