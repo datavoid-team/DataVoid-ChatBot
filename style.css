@@ -715,3 +715,17 @@ video {
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
+.dvwell {
+  background-color: #3498db; /* Set the background color */
+  color: #ffffff; /* Set the text color */
+  padding: 20px; /* Add some padding */
+  border-radius: 8px; /* Round the corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow for depth */
+  max-width: 400px; /* Set the maximum width */
+  margin: 0 auto; /* Center the box horizontally */
+}
+
+.dvwell h2 {
+  margin: 0; /* Remove default margin for h2 */
+}
+
