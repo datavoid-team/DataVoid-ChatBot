@@ -11,6 +11,19 @@
       overflow-x: auto; /* Enable horizontal scrolling for small screens */
     }
   }
+.powered {
+  font-size: 12px; /* Adjust the font size */
+  color: #777; /* Set the color to a muted or grayish tone */
+  text-align: center; /* Center the text */
+  margin-top: 20px; /* Add some top margin for spacing */
+}
+
+/* Optionally, you can style it further by adding a border or background */
+.powered {
+  border-top: 1px solid #ddd; /* Add a top border for separation */
+  padding-top: 10px; /* Add padding to the top */
+  background-color: #f8f8f8; /* Set a background color for better visibility */
+}
 ::-webkit-scrollbar {
   width: 20px;
 }
