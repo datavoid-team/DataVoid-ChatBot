@@ -686,8 +686,10 @@ video {
 }
 
 .bg-gemLight {
-  --tw-bg-opacity: 1;
-  background-color: rgb(35 71 70 / var(--tw-bg-opacity));
+  /*--tw-bg-opacity: 1;
+  background-color: rgb(35 71 70 / var(--tw-bg-opacity));*/
+    background: linear-gradient(rgba(35, 71, 70, 0.7), rgba(35, 71, 70, 0.7)); /* Use rgba for a semi-transparent background color and add a background image if desired */
+  background-blur: 10px;
 }
 
 .bg-gemRegular {
