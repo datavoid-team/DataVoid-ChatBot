@@ -47,6 +47,7 @@ export const aiDiv = (data) => {
               src="chat-bot.jpg"
               alt="user icon"
               class="w-10 h-10 rounded-full"
+              style="float: right;"
             />
           </div>
   `;
