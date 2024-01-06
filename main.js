@@ -8,11 +8,25 @@ const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
 let history = [];
 
+const showLoading = () => {
+  const chatArea = document.getElementById("chat-container");
+  chatArea.innerHTML += `<div class="bg-gray-200 p-1 rounded-md shadow-md text-center">Processing...</div>`;
+}; //added
+
 async function getResponse(prompt) {
+
+   showLoading(); //added
+
   const chat = await model.startChat({ history: history });
   const result = await chat.sendMessage(prompt);
   const response = await result.response;
   const text = response.text();
+
+  const chatArea = document.getElementById("chat-container");
+  const loadingMessage = chatArea.querySelector(".bg-gray-200");
+  if (loadingMessage) {
+    loadingMessage.remove();
+  } //added
 
   console.log(text);
   return text;
@@ -55,7 +69,7 @@ export const aiDiv = (data) => {
 
 async function handleSubmit(event) {
   event.preventDefault();
-
+   showLoading(); //added
   let userMessage = document.getElementById("prompt");
   const chatArea = document.getElementById("chat-container");
 
