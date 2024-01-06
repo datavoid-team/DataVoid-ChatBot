@@ -10,7 +10,17 @@ let history = [];
 
 const showLoading = () => {
   const chatArea = document.getElementById("chat-container");
-  chatArea.innerHTML += `<div class="bg-gray-200 p-1 rounded-md shadow-md text-center">Processing...</div>`;
+  chatArea.innerHTML += `<div class="gap-2 justify-end">
+            <pre class="bg-gemRegular/40 text-gemDeep p-1 rounded-md shadow-md whitespace-pre-wrap">
+              Processing...
+            </pre>
+            <img
+              src="chat-bot.jpg"
+              alt="user icon"
+              class="w-10 h-10 rounded-full"
+              style="float: right;"
+            />
+          </div>`;
 }; //added
 
 async function getResponse(prompt) {
