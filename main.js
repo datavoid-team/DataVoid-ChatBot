@@ -69,7 +69,7 @@ export const aiDiv = (data) => {
 
 async function handleSubmit(event) {
   event.preventDefault();
-   showLoading(); //added
+   //showLoading(); //added
   let userMessage = document.getElementById("prompt");
   const chatArea = document.getElementById("chat-container");
 
