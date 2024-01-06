@@ -10,7 +10,7 @@ let history = [];
 
 const showLoading = () => {
   const chatArea = document.getElementById("chat-container");
-  chatArea.innerHTML += `<div class="bg-gray-200 p-1 rounded-md shadow-md text-center">Processing...</div>`;
+  chatArea.innerHTML += `<div class="bg-gray-200 p-1 rounded-md shadow-md text-center procd">Processing...</div>`;
 }; //added
 
 async function getResponse(prompt) {

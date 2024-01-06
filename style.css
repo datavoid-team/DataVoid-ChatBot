@@ -18,6 +18,11 @@
  /* Add some top margin for spacing */
 }
 
+.procd{
+color:white;
+font-weight: bold;
+}
+
 /* Optionally, you can style it further by adding a border or background */
 .powered {
 /* Add a top border for separation */
