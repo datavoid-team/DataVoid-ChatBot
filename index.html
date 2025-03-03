@@ -18,35 +18,41 @@
           alt="chatbot image"
           class="w-10 h-10 rounded-lg"
         />
-        <h1 class="text-gemDeep text-lg font-medium">DataVoid AI(Chat Preview)</h1>
+        <h1 class="text-gemDeep text-lg font-medium">DataVoid AI (Chat Preview)</h1>
       </header>
-      <br><br>
+      
       <!-- Chat Box -->
-      <div class="flex-1 overflow-y-auto">
-        <!-- Chat area -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <!-- Welcome Message -->
         <center>
-          <div class="dvwell">
-            <h2>Welcome to DataVoid AI Preview!</h2><br>
-        <p>By using this chatbot, you consent to storing information relevant to the conversation to monitor and improve the service. Your privacy and data security are important, and any stored information is treated under applicable privacy policies and regulations.</p>
-          <br>  <p>This model is still in the early stages of development hence the data provided will be inaccurate or false.</p>
-        </div></center>
+          <div class="dvwell mb-6">
+            <h2 class="text-xl font-bold mb-2">Welcome to DataVoid AI Preview!</h2>
+            <p class="mb-3">By using this chatbot, you consent to storing information relevant to the conversation to monitor and improve the service. Your privacy and data security are important, and any stored information is treated under applicable privacy policies and regulations.</p>
+            <p>This model is still in the early stages of development; hence the data provided may be inaccurate or incomplete.</p>
+          </div>
+        </center>
+        
+        <!-- Chat messages will appear here -->
         <div class="p-2 flex flex-col gap-4" id="chat-container"></div>
       </div>
-      <!-- prompt -->
-      <form action="" method="post" class="p-2 h-fit" id="chat-form">
+      
+      <!-- Input form -->
+      <form action="" method="post" class="p-3 h-fit border-t border-gray-200" id="chat-form">
         <textarea
           name="prompt"
           id="prompt"
           cols="30"
-          rows="4"
-          class="w-full p-2 rounded-md resize-none focus:outline-none"
-          placeholder="Enter message here..."
+          rows="3"
+          class="w-full p-3 rounded-md resize-none focus:outline-none border border-gray-300"
+          placeholder="Enter your message here..."
         ></textarea>
-        <button type="submit" class="w-full p-1 bg-gemDeep rounded text-white">
-          Send
+        <button type="submit" class="w-full p-2 mt-2 bg-gemDeep rounded-md text-white font-medium hover:opacity-90 transition-opacity">
+          Send Message
         </button>
       </form>
-      <h6 class="powered">Built by DataVoid Team based on Google LLM</h6>
+      <footer class="p-2 text-center text-sm text-gray-500">
+        <p class="powered">Built by DataVoid Team based on Google LLM</p>
+      </footer>
     </main>
     <script type="module" src="/main.js"></script>
   </body>
