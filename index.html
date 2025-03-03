@@ -5,52 +5,341 @@
     <link rel="icon" type="image/jpeg" href="/favicon.jpg"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DataVoid AI</title>
-    <link rel="stylesheet" href="style.css" />
+    <style>
+      :root {
+        --bg-primary: #121212;
+        --bg-secondary: #1e1e1e;
+        --bg-tertiary: #252525;
+        --accent-color: #7e57c2;
+        --accent-hover: #9575cd;
+        --text-primary: #e0e0e0;
+        --text-secondary: #a0a0a0;
+        --border-color: #333333;
+        --shadow-color: rgba(0, 0, 0, 0.3);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+      }
+
+      main {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        min-height: 100vh;
+        max-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--bg-secondary);
+        box-shadow: 0 4px 20px var(--shadow-color);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      header {
+        padding: 16px 24px;
+        background-color: var(--bg-tertiary);
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      header img {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        object-fit: cover;
+        box-shadow: 0 2px 8px var(--shadow-color);
+      }
+
+      header h1 {
+        color: var(--accent-color);
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+
+      .flex-1 {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        scroll-behavior: smooth;
+      }
+
+      .flex-1::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .flex-1::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+      }
+
+      .flex-1::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+      }
+
+      .flex-1::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-color);
+      }
+
+      .dvwell {
+        background-color: var(--bg-tertiary);
+        padding: 24px;
+        border-radius: 12px;
+        margin-bottom: 32px;
+        max-width: 700px;
+        text-align: center;
+        box-shadow: 0 4px 12px var(--shadow-color);
+        border: 1px solid var(--border-color);
+      }
+
+      .dvwell h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: var(--accent-color);
+      }
+
+      .dvwell p {
+        margin-bottom: 16px;
+        line-height: 1.6;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
+      .dvwell p:last-child {
+        margin-bottom: 0;
+      }
+
+      #chat-container {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      form {
+        padding: 16px 24px;
+        height: fit-content;
+        border-top: 1px solid var(--border-color);
+        background-color: var(--bg-tertiary);
+      }
+
+      textarea {
+        width: 100%;
+        padding: 16px;
+        border-radius: 12px;
+        resize: none;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        font-size: 1rem;
+        line-height: 1.5;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px var(--shadow-color);
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px rgba(126, 87, 194, 0.3);
+      }
+
+      textarea::placeholder {
+        color: var(--text-secondary);
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 12px;
+        border-radius: 12px;
+        background-color: var(--accent-color);
+        color: white;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px var(--shadow-color);
+      }
+
+      button:hover {
+        background-color: var(--accent-hover);
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      footer {
+        padding: 12px;
+        text-align: center;
+        background-color: var(--bg-tertiary);
+        border-top: 1px solid var(--border-color);
+      }
+
+      footer p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .powered {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      /* Message styles */
+      .message {
+        padding: 16px;
+        border-radius: 12px;
+        max-width: 80%;
+        line-height: 1.5;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .user-message {
+        background-color: var(--accent-color);
+        color: white;
+        align-self: flex-end;
+        margin-left: auto;
+        border-bottom-right-radius: 4px;
+      }
+
+      .bot-message {
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        align-self: flex-start;
+        margin-right: auto;
+        border-bottom-left-radius: 4px;
+        border: 1px solid var(--border-color);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Responsive styles */
+      @media (max-width: 768px) {
+        main {
+          border-radius: 0;
+          width: 100%;
+        }
+        
+        .dvwell {
+          padding: 16px;
+        }
+        
+        .message {
+          max-width: 90%;
+        }
+        
+        form {
+          padding: 12px 16px;
+        }
+        
+        textarea {
+          padding: 12px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        header {
+          padding: 12px 16px;
+        }
+        
+        header img {
+          width: 32px;
+          height: 32px;
+        }
+        
+        header h1 {
+          font-size: 1.1rem;
+        }
+        
+        .flex-1 {
+          padding: 16px;
+        }
+        
+        .message {
+          max-width: 95%;
+        }
+      }
+    </style>
   </head>
-  <body class="w-screen min-h-screen flex flex-col p-3">
-    <main
-      class="w-screen bg-gemLight min-h-screen max-h-screen flex flex-col"
-    >
+  <body>
+    <main>
       <!-- Header -->
-      <header class="p-2 bg-gemRegular flex gap-5 items-center">
+      <header>
         <img
           src="chat-bot.jpg"
           alt="chatbot image"
-          class="w-10 h-10 rounded-lg"
         />
-        <h1 class="text-gemDeep text-lg font-medium">DataVoid AI (Chat Preview)</h1>
+        <h1>DataVoid AI (Chat Preview)</h1>
       </header>
       
       <!-- Chat Box -->
-      <div class="flex-1 overflow-y-auto p-4">
+      <div class="flex-1">
         <!-- Welcome Message -->
         <center>
-          <div class="dvwell mb-6">
-            <h2 class="text-xl font-bold mb-2">Welcome to DataVoid AI Preview!</h2>
-            <p class="mb-3">By using this chatbot, you consent to storing information relevant to the conversation to monitor and improve the service. Your privacy and data security are important, and any stored information is treated under applicable privacy policies and regulations.</p>
+          <div class="dvwell">
+            <h2>Welcome to DataVoid AI Preview!</h2>
+            <p>By using this chatbot, you consent to storing information relevant to the conversation to monitor and improve the service. Your privacy and data security are important, and any stored information is treated under applicable privacy policies and regulations.</p>
             <p>This model is still in the early stages of development; hence the data provided may be inaccurate or incomplete.</p>
           </div>
         </center>
         
         <!-- Chat messages will appear here -->
-        <div class="p-2 flex flex-col gap-4" id="chat-container"></div>
+        <div id="chat-container">
+          <!-- Example messages for preview -->
+          <div class="message user-message">
+            Hello, can you help me analyze some data?
+          </div>
+          <div class="message bot-message">
+            Hello! I'd be happy to help you analyze your data. What kind of data are you working with, and what insights are you looking to gain?
+          </div>
+        </div>
       </div>
       
       <!-- Input form -->
-      <form action="" method="post" class="p-3 h-fit border-t border-gray-200" id="chat-form">
+      <form action="" method="post" id="chat-form">
         <textarea
           name="prompt"
           id="prompt"
           cols="30"
           rows="3"
-          class="w-full p-3 rounded-md resize-none focus:outline-none border border-gray-300"
           placeholder="Enter your message here..."
         ></textarea>
-        <button type="submit" class="w-full p-2 mt-2 bg-gemDeep rounded-md text-white font-medium hover:opacity-90 transition-opacity">
+        <button type="submit">
           Send Message
         </button>
       </form>
-      <footer class="p-2 text-center text-sm text-gray-500">
+      <footer>
         <p class="powered">Built by DataVoid Team based on Google LLM</p>
       </footer>
     </main>
