@@ -2,162 +2,58 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="/favicon.jpg"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DataVoid AI</title>
-    <style>
-      :root {
-        --primary-color: #4a55a2;
-        --secondary-color: #2d3748;
-        --accent-color: #3182ce;
-        --background: #1a202c;
-        --text-color: #e2e8f0;
-        --input-bg: #2d3748;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Inter', sans-serif;
-      }
-
-      body {
-        background: var(--background);
-        color: var(--text-color);
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
-
-      main {
-        flex: 1;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-      }
-
-      header {
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-        padding: 1.5rem;
-        border-radius: 1rem;
-        margin-bottom: 2rem;
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-      }
-
-      header img {
-        width: 4rem;
-        height: 4rem;
-        border-radius: 50%;
-        border: 2px solid var(--accent-color);
-      }
-
-      .welcome-message {
-        background: var(--secondary-color);
-        padding: 2rem;
-        border-radius: 1rem;
-        margin-bottom: 2rem;
-      }
-
-      #chat-container {
-        background: var(--secondary-color);
-        padding: 1.5rem;
-        border-radius: 1rem;
-        margin-bottom: 2rem;
-        max-height: 60vh;
-        overflow-y: auto;
-      }
-
-      .chat-message {
-        background: var(--input-bg);
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-        max-width: 70%;
-      }
-
-      .user-message {
-        background: var(--accent-color);
-        margin-left: auto;
-      }
-
-      #chat-form {
-        background: var(--secondary-color);
-        padding: 1.5rem;
-        border-radius: 1rem;
-      }
-
-      #prompt {
-        background: var(--input-bg);
-        color: var(--text-color);
-        border: none;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-        padding: 1rem;
-        width: 100%;
-      }
-
-      button {
-        background: var(--accent-color);
-        color: white;
-        padding: 1rem 2rem;
-        border: none;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-
-      button:hover {
-        opacity: 0.9;
-      }
-
-      footer {
-        margin-top: auto;
-        padding: 1.5rem;
-        text-align: center;
-        color: #808796;
-      }
-
-      @media (max-width: 768px) {
-        main {
-          padding: 1rem;
-        }
-
-        header img {
-          width: 3rem;
-          height: 3rem;
-        }
-
-        #chat-container {
-          max-height: 50vh;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
-    <main>
-      <header>
-        <img src="chat-bot.jpg" alt="DataVoid AI" />
-        <h1>DataVoid AI</h1>
+  <body class="w-screen min-h-screen flex flex-col p-3">
+    <main
+      class="w-screen bg-gemLight min-h-screen max-h-screen flex flex-col"
+    >
+      <!-- Header -->
+      <header class="p-2 bg-gemRegular flex gap-5 items-center">
+        <img
+          src="chat-bot.jpg"
+          alt="chatbot image"
+          class="w-10 h-10 rounded-lg"
+        />
+        <h1 class="text-gemDeep text-lg font-medium">DataVoid AI (Chat Preview)</h1>
       </header>
-
-      <div class="welcome-message">
-        <h2>Welcome to DataVoid AI</h2>
-        <p>Your privacy and data security are our top priorities. All conversations are encrypted and stored securely.</p>
-      </div>
-
-      <div id="chat-container">
+      
+      <!-- Chat Box -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <!-- Welcome Message -->
+        <center>
+          <div class="dvwell mb-6">
+            <h2 class="text-xl font-bold mb-2">Welcome to DataVoid AI Preview!</h2>
+            <p class="mb-3">By using this chatbot, you consent to storing information relevant to the conversation to monitor and improve the service. Your privacy and data security are important, and any stored information is treated under applicable privacy policies and regulations.</p>
+            <p>This model is still in the early stages of development; hence the data provided may be inaccurate or incomplete.</p>
+          </div>
+        </center>
+        
         <!-- Chat messages will appear here -->
+        <div class="p-2 flex flex-col gap-4" id="chat-container"></div>
       </div>
-
-      <form id="chat-form">
-        <textarea id="prompt" placeholder="Type your message..."></textarea>
-        <button type="submit">Send</button>
+      
+      <!-- Input form -->
+      <form action="" method="post" class="p-3 h-fit border-t border-gray-200" id="chat-form">
+        <textarea
+          name="prompt"
+          id="prompt"
+          cols="30"
+          rows="3"
+          class="w-full p-3 rounded-md resize-none focus:outline-none border border-gray-300"
+          placeholder="Enter your message here..."
+        ></textarea>
+        <button type="submit" class="w-full p-2 mt-2 bg-gemDeep rounded-md text-white font-medium hover:opacity-90 transition-opacity">
+          Send Message
+        </button>
       </form>
+      <footer class="p-2 text-center text-sm text-gray-500">
+        <p class="powered">Built by DataVoid Team based on Google LLM</p>
+      </footer>
     </main>
-    <footer>
-      <p>Powered by DataVoid AI</p>
-    </footer>
+    <script type="module" src="/main.js"></script>
   </body>
 </html>
