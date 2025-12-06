@@ -7,6 +7,7 @@
     <title>DataVoid AI</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark-reasonable.min.css">
     
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
@@ -21,10 +22,11 @@
             },
             colors: {
               void: {
-                bg: '#050505',
-                card: '#121212',
-                border: '#2A2A2A',
-                accent: '#7e57c2',
+                bg: '#050505',       // Ultra dark background
+                card: '#121212',     // Slightly lighter for elements
+                border: '#1F1F1F',   // Subtle borders
+                accent: '#3b82f6',   // BRAND COLOR: Blue (Matches your request)
+                accentHover: '#2563eb',
               }
             },
             animation: {
@@ -41,11 +43,33 @@
     </script>
     
     <style>
-      /* STRICT LAYOUT CONTROL */
-      html, body { height: 100%; width: 100%; overflow: hidden; background-color: #050505; color: #e5e5e5; }
+      /* --- STRICT LAYOUT CONTROL --- */
+      /* This ensures the page is exactly 100% height and doesn't scroll the body */
+      html, body { 
+        height: 100%; 
+        width: 100%; 
+        overflow: hidden; 
+        background-color: #050505; 
+        color: #e5e5e5; 
+      }
       
-      /* Code Block Copy Button */
-      .code-wrapper { position: relative; margin: 1rem 0; border: 1px solid #2A2A2A; border-radius: 0.5rem; overflow: hidden; }
+      /* --- CUSTOM SCROLLBAR --- */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #333; border-radius: 20px; }
+      ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+      
+      /* --- MARKDOWN OVERRIDES --- */
+      .prose pre { margin: 0 !important; border-radius: 0 !important; border: none !important; }
+      
+      /* --- COPY BUTTON STYLES (Code Blocks) --- */
+      .code-wrapper { 
+        position: relative; 
+        margin: 1rem 0; 
+        border: 1px solid #2A2A2A; 
+        border-radius: 0.5rem; 
+        overflow: hidden; 
+      }
       .code-header {
         display: flex; justify-content: space-between; align-items: center;
         background: #121212; padding: 0.5rem 1rem; border-bottom: 1px solid #2A2A2A;
@@ -58,88 +82,97 @@
       }
       .copy-btn:hover { color: #e5e5e5; }
       
-      /* Message Copy Button (Chat Bubbles) */
+      /* --- MESSAGE COPY BUTTONS (Chat Bubbles) --- */
       .msg-copy-btn {
-        opacity: 0; transition: opacity 0.2s ease-in-out;
-        color: #666; padding: 4px; border-radius: 4px;
+        opacity: 0; 
+        transition: opacity 0.2s ease-in-out;
+        color: #666; 
+        padding: 4px; 
+        border-radius: 4px;
         cursor: pointer;
+        background-color: transparent;
       }
-      /* Show button on hover of the parent message group */
+      /* Only show button when hovering over the message group */
       .group:hover .msg-copy-btn { opacity: 1; }
-      .msg-copy-btn:hover { color: #e5e5e5; background-color: rgba(255,255,255,0.1); }
+      .msg-copy-btn:hover { color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
 
-      /* Mobile: Always show copy buttons since there is no hover */
+      /* On mobile, always show copy buttons because there is no hover */
       @media (max-width: 768px) {
         .msg-copy-btn { opacity: 1 !important; color: #444; }
       }
-
-      /* Scrollbar */
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #333; border-radius: 20px; }
-      ::-webkit-scrollbar-thumb:hover { background: #7e57c2; }
-      
-      .prose pre { margin: 0 !important; border-radius: 0 !important; border: none !important; }
     </style>
   </head>
   <body class="flex flex-col h-full antialiased selection:bg-void-accent selection:text-white">
 
     <header class="h-14 flex-none border-b border-void-border bg-void-bg/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-50">
       <div class="flex items-center gap-3 cursor-default">
-        <img src="/chat-bot.jpg" alt="Logo" class="w-8 h-8 rounded-lg object-cover ring-1 ring-void-border">
+        <img src="/chat-bot.jpg" alt="Logo" class="w-8 h-8 rounded-lg object-cover ring-1 ring-void-border shadow-lg shadow-blue-900/10">
         <div>
           <h1 class="font-bold text-sm text-white tracking-tight">DataVoid AI</h1>
           <span class="text-[10px] text-gray-500 font-mono block leading-none mt-0.5">Streaming Enabled</span>
         </div>
       </div>
-      <button id="clear-btn" class="text-xs font-medium text-gray-500 hover:text-red-400 px-3 py-1.5 rounded hover:bg-white/5 transition-colors">
+      <button id="clear-btn" class="text-xs font-medium text-gray-500 hover:text-red-400 px-3 py-1.5 rounded hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
         Clear Chat
       </button>
     </header>
 
     <main class="flex-1 flex flex-col min-h-0 relative">
       
-      <div id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth">
-        <div id="welcome-screen" class="flex flex-col items-center justify-center min-h-[60vh] space-y-6 animate-slide-up pb-10">
-          <div class="w-16 h-16 rounded-2xl bg-void-card border border-void-border flex items-center justify-center shadow-2xl mb-2">
-            <span class="text-3xl">✨</span>
-          </div>
-          <div class="text-center space-y-2 max-w-md">
-            <h2 class="text-2xl font-bold text-white">Hello, I am DataVoid.</h2>
-            <p class="text-sm text-gray-500">I am ready to help you write code, debug errors, and analyze data.</p>
+      <div id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scroll-smooth">
+        
+        <div id="welcome-screen" class="flex flex-col items-center justify-center min-h-[60vh] space-y-8 animate-slide-up pb-10">
+          
+          <div class="text-center space-y-4">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-void-card border border-void-border shadow-2xl shadow-void-accent/10 mb-2">
+              <span class="text-3xl">✨</span>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-bold text-white tracking-tight">
+              Hello, I am DataVoid.
+            </h2>
+            <p class="text-sm text-gray-500 max-w-sm mx-auto leading-relaxed">
+              I am ready to help you write code, debug errors, and analyze data securely.
+            </p>
           </div>
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
-            <button class="suggestion-btn text-left p-3 rounded-lg bg-void-card border border-void-border hover:border-void-accent/50 hover:bg-void-accent/5 transition-all group">
-              <span class="block text-sm font-medium text-gray-300 group-hover:text-void-accent">Write Python Code</span>
-              <span class="block text-xs text-gray-600">To visualize data</span>
+            <button class="suggestion-btn text-left p-4 rounded-xl bg-void-card border border-void-border hover:border-void-accent/50 hover:bg-void-accent/5 transition-all group">
+              <span class="block text-sm font-semibold text-gray-300 group-hover:text-void-accent mb-0.5">Write Python Code</span>
+              <span class="block text-xs text-gray-600">To visualize data using pandas</span>
             </button>
-            <button class="suggestion-btn text-left p-3 rounded-lg bg-void-card border border-void-border hover:border-void-accent/50 hover:bg-void-accent/5 transition-all group">
-              <span class="block text-sm font-medium text-gray-300 group-hover:text-void-accent">Create a React Component</span>
-              <span class="block text-xs text-gray-600">Using Tailwind CSS</span>
+            <button class="suggestion-btn text-left p-4 rounded-xl bg-void-card border border-void-border hover:border-void-accent/50 hover:bg-void-accent/5 transition-all group">
+              <span class="block text-sm font-semibold text-gray-300 group-hover:text-void-accent mb-0.5">Create a React Component</span>
+              <span class="block text-xs text-gray-600">Using Tailwind CSS for styling</span>
             </button>
           </div>
+
+          <div class="text-[10px] text-gray-700 max-w-xs text-center">
+            AI can make mistakes. Please verify important information.
+          </div>
         </div>
+
       </div>
 
       <div class="flex-none w-full bg-void-bg border-t border-void-border p-4 z-20">
         <div class="max-w-3xl mx-auto relative group">
-          <div class="absolute -inset-0.5 bg-gradient-to-r from-void-accent to-purple-600 rounded-xl blur opacity-20 group-focus-within:opacity-40 transition duration-500"></div>
+          <div class="absolute -inset-0.5 bg-gradient-to-r from-void-accent to-blue-400 rounded-xl blur opacity-20 group-focus-within:opacity-40 transition duration-500"></div>
+          
           <form id="chat-form" class="relative flex items-end gap-2 bg-[#0a0a0a] rounded-xl p-2 border border-void-border shadow-2xl">
             <textarea
               id="prompt"
               rows="1"
-              class="w-full bg-transparent text-gray-200 placeholder-gray-600 text-sm px-3 py-3 focus:outline-none resize-none max-h-40 custom-scrollbar font-sans"
+              class="w-full bg-transparent text-gray-200 placeholder-gray-600 text-sm md:text-base px-3 py-3 focus:outline-none resize-none max-h-40 custom-scrollbar font-sans"
               placeholder="Ask DataVoid anything..."
               required
             ></textarea>
-            <button type="submit" id="send-btn" class="p-2.5 rounded-lg bg-void-accent hover:bg-[#6948a3] text-white transition-all shadow-lg mb-0.5 disabled:opacity-50 disabled:grayscale">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            <button type="submit" id="send-btn" class="p-2.5 rounded-lg bg-void-accent hover:bg-void-accentHover text-white transition-all shadow-lg mb-0.5 disabled:opacity-50 disabled:grayscale">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
           </form>
-          <div class="flex justify-between mt-2 px-1">
-            <p class="text-[10px] text-gray-600">DataVoid AI Preview</p>
-            <p class="text-[10px] text-gray-600">Built by DataVoid Team</p>
+          
+          <div class="flex justify-between mt-3 px-1">
+            <p class="text-[10px] text-gray-600 font-medium">DataVoid AI Preview v1.0</p>
+            <p class="text-[10px] text-gray-600 font-medium">Built by DataVoid Team</p>
           </div>
         </div>
       </div>
