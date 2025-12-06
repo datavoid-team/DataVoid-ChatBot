@@ -1,14 +1,28 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["*.html"],
+  content: [
+    "./index.html",
+    "./*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
-      colors: {
-        gemLight: "#e5f5e0",
-        gemRegular: "#a1d99b",
-        gemDeep: "#31a354",
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-out',
+        'fade-in-up': 'fadeInUp 0.5s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
     },
   },
-  plugins: [],
-};
+  plugins: [
+    require('@tailwindcss/typography'), // Optional: for nice markdown text
+  ],
+}
