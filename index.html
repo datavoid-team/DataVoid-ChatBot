@@ -1,344 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/jpeg" href="/favicon.jpg"/>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DataVoid AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-      :root {
-        --bg-primary: #121212;
-        --bg-secondary: #1e1e1e;
-        --bg-tertiary: #252525;
-        --accent-color: #7e57c2;
-        --accent-hover: #9575cd;
-        --text-primary: #e0e0e0;
-        --text-secondary: #a0a0a0;
-        --border-color: #333333;
-        --shadow-color: rgba(0, 0, 0, 0.3);
+      /* Custom Scrollbar */
+      .scrollbar-hide::-webkit-scrollbar {
+          display: none;
       }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
       }
-
-      body {
-        background-color: var(--bg-primary);
-        color: var(--text-primary);
-        width: 100%;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        transition: all 0.3s ease;
+      .custom-scrollbar::-webkit-scrollbar-track {
+          background: #1f2937;
       }
-
-      main {
-        width: 100%;
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #4b5563;
+          border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+      }
       
-        margin: 0 auto;
-        min-height: 100vh;
-        max-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        background-color: var(--bg-secondary);
-        box-shadow: 0 4px 20px var(--shadow-color);
-        border-radius: 12px;
-        overflow: hidden;
+      /* Typing Animation */
+      .typing-dot {
+        animation: typing 1.4s infinite ease-in-out both;
+      }
+      .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+      .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+      
+      @keyframes typing {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
       }
 
-      header {
-        padding: 16px 24px;
-        background-color: var(--bg-tertiary);
-        display: flex;
-        gap: 16px;
-        align-items: center;
-        border-bottom: 1px solid var(--border-color);
+      /* Markdown Styles */
+      .prose pre {
+        background-color: #1e1e1e !important;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
       }
-
-      header img {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        object-fit: cover;
-        box-shadow: 0 2px 8px var(--shadow-color);
-      }
-
-      header h1 {
-        color: var(--accent-color);
-        font-size: 1.25rem;
-        font-weight: 600;
-        letter-spacing: 0.3px;
-      }
-
-      .flex-1 {
-        flex: 1;
-        overflow-y: auto;
-        padding: 24px;
-        scroll-behavior: smooth;
-      }
-
-      .flex-1::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      .flex-1::-webkit-scrollbar-track {
-        background: var(--bg-secondary);
-      }
-
-      .flex-1::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 4px;
-      }
-
-      .flex-1::-webkit-scrollbar-thumb:hover {
-        background: var(--accent-color);
-      }
-
-      .dvwell {
-        background-color: var(--bg-tertiary);
-        padding: 24px;
-        border-radius: 12px;
-        margin-bottom: 32px;
-        max-width: 700px;
-        text-align: center;
-        box-shadow: 0 4px 12px var(--shadow-color);
-        border: 1px solid var(--border-color);
-      }
-
-      .dvwell h2 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 16px;
-        color: var(--accent-color);
-      }
-
-      .dvwell p {
-        margin-bottom: 16px;
-        line-height: 1.6;
-        color: var(--text-secondary);
-        font-size: 0.95rem;
-      }
-
-      .dvwell p:last-child {
-        margin-bottom: 0;
-      }
-
-      #chat-container {
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      form {
-        padding: 16px 24px;
-        height: fit-content;
-        border-top: 1px solid var(--border-color);
-        background-color: var(--bg-tertiary);
-      }
-
-      textarea {
-        width: 100%;
-        padding: 16px;
-        border-radius: 12px;
-        resize: none;
-        background-color: var(--bg-primary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        font-size: 1rem;
-        line-height: 1.5;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px var(--shadow-color);
-      }
-
-      textarea:focus {
-        outline: none;
-        border-color: var(--accent-color);
-        box-shadow: 0 0 0 2px rgba(126, 87, 194, 0.3);
-      }
-
-      textarea::placeholder {
-        color: var(--text-secondary);
-      }
-
-      button {
-        width: 100%;
-        padding: 14px;
-        margin-top: 12px;
-        border-radius: 12px;
-        background-color: var(--accent-color);
-        color: white;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 8px var(--shadow-color);
-      }
-
-      button:hover {
-        background-color: var(--accent-hover);
-        transform: translateY(-2px);
-      }
-
-      button:active {
-        transform: translateY(0);
-      }
-
-      footer {
-        padding: 12px;
-        text-align: center;
-        background-color: var(--bg-tertiary);
-        border-top: 1px solid var(--border-color);
-      }
-
-      footer p {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-      }
-
-      .powered {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-      }
-
-      /* Message styles */
-      .message {
-        padding: 16px;
-        border-radius: 12px;
-        max-width: 80%;
-        line-height: 1.5;
-        animation: fadeIn 0.3s ease;
-      }
-
-      .user-message {
-        background-color: var(--accent-color);
-        color: white;
-        align-self: flex-end;
-        margin-left: auto;
-        border-bottom-right-radius: 4px;
-      }
-
-      .bot-message {
-        background-color: var(--bg-tertiary);
-        color: var(--text-primary);
-        align-self: flex-start;
-        margin-right: auto;
-        border-bottom-left-radius: 4px;
-        border: 1px solid var(--border-color);
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      /* Responsive styles */
-      @media (max-width: 768px) {
-        main {
-          border-radius: 0;
-          width: 100%;
-        }
-        
-        .dvwell {
-          padding: 16px;
-        }
-        
-        .message {
-          max-width: 90%;
-        }
-        
-        form {
-          padding: 12px 16px;
-        }
-        
-        textarea {
-          padding: 12px;
-        }
-      }
-
-      @media (max-width: 480px) {
-        header {
-          padding: 12px 16px;
-        }
-        
-        header img {
-          width: 32px;
-          height: 32px;
-        }
-        
-        header h1 {
-          font-size: 1.1rem;
-        }
-        
-        .flex-1 {
-          padding: 16px;
-        }
-        
-        .message {
-          max-width: 95%;
-        }
+      .prose code {
+        color: #e2e8f0;
+        font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
       }
     </style>
   </head>
-  <body>
-    <main>
-      <!-- Header -->
-      <header>
-        <img
-          src="chat-bot.jpg"
-          alt="chatbot image"
-        />
-        <h1>DataVoid AI (Chat Preview)</h1>
-      </header>
-      
-      <!-- Chat Box -->
-      <div class="flex-1">
-        <!-- Welcome Message -->
-        <center>
-          <div class="dvwell">
-            <h2>Welcome to DataVoid AI Preview!</h2>
-            <p>By using this chatbot, you consent to storing information relevant to the conversation to monitor and improve the service. Your privacy and data security are important, and any stored information is treated under applicable privacy policies and regulations.</p>
-            <p>This model is still in the early stages of development; hence the data provided may be inaccurate or incomplete.</p>
+  <body class="bg-gray-950 text-gray-100 font-inter h-screen flex flex-col overflow-hidden selection:bg-purple-500 selection:text-white">
+
+    <header class="bg-gray-900/80 backdrop-blur-md border-b border-gray-800 p-4 z-20 sticky top-0">
+      <div class="max-w-4xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
           </div>
-        </center>
-        
-        <!-- Chat messages will appear here -->
-        <div id="chat-container">
-          <div class="message bot-message">
-            Hello! How can I help?
+          <div>
+            <h1 class="text-lg font-semibold tracking-tight">DataVoid AI</h1>
+            <p class="text-xs text-gray-400 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              Online
+            </p>
           </div>
         </div>
-      </div>
-      
-      <!-- Input form -->
-      <form action="" method="post" id="chat-form">
-        <textarea
-          name="prompt"
-          id="prompt"
-          cols="30"
-          rows="3"
-          placeholder="Enter your message here..."
-        ></textarea>
-        <button type="submit">
-          Send Message
+        <button id="clear-btn" class="text-xs font-medium text-gray-400 hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 border border-transparent hover:border-white/10">
+          Clear Chat
         </button>
-      </form>
-      <footer>
-        <p class="powered">Built by DataVoid Team based on Google LLM</p>
-      </footer>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-hidden relative w-full max-w-4xl mx-auto flex flex-col">
+      <div id="chat-container" class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-6 scroll-smooth">
+        
+        <div id="welcome-message" class="flex flex-col items-center justify-center mt-10 md:mt-20 text-center space-y-4 animate-fade-in-up">
+          <div class="w-16 h-16 rounded-2xl bg-gray-800 flex items-center justify-center mb-2 shadow-xl border border-gray-700">
+            <span class="text-3xl">👋</span>
+          </div>
+          <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+            How can I help you today?
+          </h2>
+          <p class="text-gray-400 max-w-md text-sm leading-relaxed">
+            I'm powered by Google's Gemini Flash model. I can help you write code, draft emails, or explain complex topics.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-lg mt-6">
+            <button class="suggestion-btn text-left p-3 rounded-xl bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-purple-500/50 transition-all group">
+              <span class="block text-sm font-medium text-gray-200 group-hover:text-purple-300">Explain Quantum Computing</span>
+              <span class="block text-xs text-gray-500">Like I'm five years old</span>
+            </button>
+            <button class="suggestion-btn text-left p-3 rounded-xl bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-purple-500/50 transition-all group">
+              <span class="block text-sm font-medium text-gray-200 group-hover:text-purple-300">Write a Python Script</span>
+              <span class="block text-xs text-gray-500">To parse a CSV file</span>
+            </button>
+          </div>
+        </div>
+
+        </div>
+
+      <div class="p-4 bg-gray-950/80 backdrop-blur-sm">
+        <form id="chat-form" class="relative max-w-4xl mx-auto">
+          <div class="relative flex items-end gap-2 bg-gray-900 border border-gray-700 rounded-xl p-2 shadow-lg focus-within:ring-2 focus-within:ring-purple-500/30 focus-within:border-purple-500 transition-all">
+            <textarea
+              id="prompt"
+              name="prompt"
+              rows="1"
+              class="w-full bg-transparent text-gray-100 placeholder-gray-500 text-sm md:text-base px-3 py-3 focus:outline-none resize-none max-h-48 scrollbar-hide"
+              placeholder="Message DataVoid AI..."
+              required
+            ></textarea>
+            <button
+              type="submit"
+              id="send-btn"
+              class="p-2.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-900/20 mb-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+              </svg>
+            </button>
+          </div>
+          <p class="text-center text-[10px] text-gray-600 mt-2">
+            AI can make mistakes. Please verify important information.
+          </p>
+        </form>
+      </div>
     </main>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>
