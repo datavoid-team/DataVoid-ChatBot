@@ -1,3 +1,6 @@
+import './input.css'; // <--- ADD THIS LINE AT THE TOP
+import { GoogleGenerativeAI } from "@google/generative-ai";
+// ... rest of the code
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import md from "markdown-it";
 import hljs from "highlight.js";
