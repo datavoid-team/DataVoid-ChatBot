@@ -44,7 +44,7 @@
       /* STRICT LAYOUT CONTROL */
       html, body { height: 100%; width: 100%; overflow: hidden; background-color: #050505; color: #e5e5e5; }
       
-      /* Code Block Copy Button Styles */
+      /* Code Block Copy Button */
       .code-wrapper { position: relative; margin: 1rem 0; border: 1px solid #2A2A2A; border-radius: 0.5rem; overflow: hidden; }
       .code-header {
         display: flex; justify-content: space-between; align-items: center;
@@ -57,15 +57,28 @@
         transition: color 0.2s; font-size: 0.75rem;
       }
       .copy-btn:hover { color: #e5e5e5; }
-      .copy-icon { width: 14px; height: 14px; }
       
+      /* Message Copy Button (Chat Bubbles) */
+      .msg-copy-btn {
+        opacity: 0; transition: opacity 0.2s ease-in-out;
+        color: #666; padding: 4px; border-radius: 4px;
+        cursor: pointer;
+      }
+      /* Show button on hover of the parent message group */
+      .group:hover .msg-copy-btn { opacity: 1; }
+      .msg-copy-btn:hover { color: #e5e5e5; background-color: rgba(255,255,255,0.1); }
+
+      /* Mobile: Always show copy buttons since there is no hover */
+      @media (max-width: 768px) {
+        .msg-copy-btn { opacity: 1 !important; color: #444; }
+      }
+
       /* Scrollbar */
       ::-webkit-scrollbar { width: 6px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #333; border-radius: 20px; }
       ::-webkit-scrollbar-thumb:hover { background: #7e57c2; }
       
-      /* Markdown Overrides */
       .prose pre { margin: 0 !important; border-radius: 0 !important; border: none !important; }
     </style>
   </head>

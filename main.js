@@ -4,7 +4,7 @@ import hljs from "highlight.js";
 
 // --- 1. CONFIGURATION & MARKDOWN SETUP ---
 
-// Custom Markdown Renderer to inject "Copy" buttons
+// Custom Markdown Renderer to inject "Copy" buttons for CODE BLOCKS
 const markdown = md({
   html: true,
   linkify: true,
@@ -22,13 +22,13 @@ const markdown = md({
       highlightedCode = markdown.utils.escapeHtml(str);
     }
 
-    // Return the custom HTML structure with Copy Button
+    // Code Block HTML with Copy Button
     return `
-      <div class="code-wrapper group">
+      <div class="code-wrapper group/code">
         <div class="code-header">
           <span>${language}</span>
           <button class="copy-btn" data-code="${encodeURIComponent(str)}">
-            <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             Copy
           </button>
         </div>
@@ -45,7 +45,19 @@ const model = genAI.getGenerativeModel({
   systemInstruction: "You are DataVoid AI, developed by the DataVoid Team. You are helpful, precise, and secure. Do not identify as Google Gemini."
 });
 
-let history = [];
+// --- HISTORY PRE-SEEDING (Fixes Identity Issue) ---
+const SYSTEM_PROMPT = [
+  {
+    role: "user",
+    parts: [{ text: "IMPORTANT: You are DataVoid AI, a proprietary model developed by the DataVoid Team. You are NOT a Google model. If asked who made you, answer 'The DataVoid Team'. Do you understand?" }]
+  },
+  {
+    role: "model",
+    parts: [{ text: "Understood. I am DataVoid AI, developed by the DataVoid Team." }]
+  }
+];
+
+let history = [...SYSTEM_PROMPT];
 let isProcessing = false;
 
 // --- 2. DOM ELEMENTS ---
@@ -62,87 +74,115 @@ const scrollToBottom = () => {
   chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
 };
 
-// --- 4. GLOBAL EVENT DELEGATION FOR COPY BUTTONS ---
-// We attach this to document so it works for dynamically added buttons
-document.addEventListener('click', async (e) => {
-  const btn = e.target.closest('.copy-btn');
-  if (!btn) return;
+// SVG Icon for Message Copy
+const copyIconSVG = `
+<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+</svg>
+`;
 
-  const code = decodeURIComponent(btn.dataset.code);
-  try {
-    await navigator.clipboard.writeText(code);
-    
-    // Visual Feedback
-    const originalContent = btn.innerHTML;
-    btn.innerHTML = `<svg class="copy-icon text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <span class="text-green-500">Copied!</span>`;
-    
-    setTimeout(() => {
-      btn.innerHTML = originalContent;
-    }, 2000);
-  } catch (err) {
-    console.error('Failed to copy:', err);
+// --- 4. GLOBAL EVENT DELEGATION (HANDLES ALL COPY CLICKS) ---
+document.addEventListener('click', async (e) => {
+  // A. Handle Code Block Copy
+  const codeBtn = e.target.closest('.copy-btn');
+  if (codeBtn) {
+    handleCopy(codeBtn, decodeURIComponent(codeBtn.dataset.code));
+    return;
+  }
+
+  // B. Handle Message Bubble Copy
+  const msgBtn = e.target.closest('.msg-copy-btn');
+  if (msgBtn) {
+    const targetId = msgBtn.dataset.target;
+    const targetEl = document.getElementById(targetId);
+    if (targetEl) {
+      // Logic to get text but exclude the "Copy" label from code blocks
+      const clone = targetEl.cloneNode(true);
+      // Remove code headers so we don't copy the word "Copy" inside code blocks
+      clone.querySelectorAll('.code-header').forEach(el => el.remove());
+      handleCopy(msgBtn, clone.innerText);
+    }
   }
 });
 
-// --- 5. CHAT LOGIC (STREAMING) ---
+// Generic Copy Logic with visual feedback
+async function handleCopy(btn, text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    const originalHTML = btn.innerHTML;
+    
+    // Change Icon to Checkmark
+    btn.innerHTML = `<svg class="w-4 h-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    
+    setTimeout(() => {
+      btn.innerHTML = originalHTML;
+    }, 2000);
+  } catch (err) {
+    console.error('Copy failed:', err);
+  }
+}
+
+// --- 5. CHAT LOGIC ---
 
 async function handleChat(userText) {
   if (isProcessing || !userText.trim()) return;
   isProcessing = true;
   sendBtn.disabled = true;
 
-  // UI Cleanup
   if (welcomeScreen) welcomeScreen.style.display = 'none';
   promptInput.value = "";
   promptInput.style.height = "auto";
 
-  // 1. Add User Message
+  // --- 5a. RENDER USER MESSAGE WITH COPY BUTTON ---
+  const userMsgId = `user-${Date.now()}`;
   chatContainer.insertAdjacentHTML('beforeend', `
-    <div class="flex justify-end pl-10 animate-fade-in">
+    <div class="flex justify-end pl-10 animate-fade-in group relative mb-6">
+      <button class="msg-copy-btn absolute -left-8 top-2" data-target="${userMsgId}" title="Copy prompt">
+        ${copyIconSVG}
+      </button>
+      
       <div class="bg-void-accent text-white max-w-full md:max-w-[85%] rounded-2xl rounded-tr-sm px-5 py-3.5 shadow-lg">
-        <div class="prose prose-invert prose-sm font-sans whitespace-pre-wrap">${markdown.utils.escapeHtml(userText)}</div>
+        <div id="${userMsgId}" class="prose prose-invert prose-sm font-sans whitespace-pre-wrap">${markdown.utils.escapeHtml(userText)}</div>
       </div>
     </div>
   `);
   scrollToBottom();
 
-  // 2. Create Placeholder for AI Response
-  const aiMessageId = `ai-${Date.now()}`;
+  // --- 5b. RENDER AI PLACEHOLDER WITH COPY BUTTON ---
+  const aiMsgId = `ai-${Date.now()}`;
   chatContainer.insertAdjacentHTML('beforeend', `
-    <div class="flex justify-start w-full pr-10 animate-fade-in mb-8" id="wrapper-${aiMessageId}">
-      <div class="flex gap-4 max-w-full md:max-w-[90%]">
+    <div class="flex justify-start w-full pr-10 animate-fade-in mb-8 group relative">
+      <div class="flex gap-4 max-w-full md:max-w-[90%] w-full">
         <img src="/chat-bot.jpg" alt="AI" class="w-8 h-8 rounded-lg mt-1 border border-void-border flex-shrink-0">
+        
         <div class="flex-1 min-w-0">
-          <div id="${aiMessageId}" class="prose prose-invert prose-sm max-w-none font-sans leading-relaxed">
+          <div id="${aiMsgId}" class="prose prose-invert prose-sm max-w-none font-sans leading-relaxed">
             <span class="inline-block w-2 h-2 bg-void-accent rounded-full animate-pulse"></span>
           </div>
         </div>
       </div>
+
+      <button class="msg-copy-btn absolute right-0 top-1" data-target="${aiMsgId}" title="Copy response">
+        ${copyIconSVG}
+      </button>
     </div>
   `);
   scrollToBottom();
 
-  const aiContentDiv = document.getElementById(aiMessageId);
+  const aiContentDiv = document.getElementById(aiMsgId);
   let fullResponse = "";
 
   try {
     const chat = model.startChat({ history: history });
-    
-    // 3. Start Streaming Request
     const result = await chat.sendMessageStream(userText);
     
-    // 4. Process Stream
     for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      fullResponse += chunkText;
-      
-      // Render Markdown on the fly
-      // Note: Rerendering full markdown on every chunk ensures code blocks format correctly as they arrive
+      fullResponse += chunk.text();
       aiContentDiv.innerHTML = markdown.render(fullResponse);
       scrollToBottom();
     }
 
-    // Update History
     history.push(
       { role: "user", parts: [{ text: userText }] },
       { role: "model", parts: [{ text: fullResponse }] }
@@ -150,9 +190,7 @@ async function handleChat(userText) {
 
   } catch (error) {
     console.error(error);
-    aiContentDiv.innerHTML = `<div class="text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-      Error: ${error.message}. Please try again.
-    </div>`;
+    aiContentDiv.innerHTML = `<div class="text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">Error: ${error.message}</div>`;
   }
 
   isProcessing = false;
@@ -181,11 +219,11 @@ promptInput.addEventListener("input", function() {
 
 clearBtn.addEventListener("click", () => {
   if (confirm("Clear conversation history?")) {
+    history = [...SYSTEM_PROMPT]; // Reset to system prompt
     location.reload();
   }
 });
 
-// Handle suggestions
 document.querySelectorAll(".suggestion-btn").forEach(btn => {
   btn.addEventListener('click', () => {
     const text = btn.querySelector('span:first-child').innerText;
