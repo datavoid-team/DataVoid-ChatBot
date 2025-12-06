@@ -2,146 +2,165 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import md from "markdown-it";
 import hljs from "highlight.js";
 
-// --- Configuration ---
+// --- 1. CONFIGURATION & MARKDOWN SETUP ---
+
+// Custom Markdown Renderer to inject "Copy" buttons
 const markdown = md({
   html: true,
   linkify: true,
   typographer: true,
   highlight: function (str, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return `<div class="code-block-wrapper my-4 border border-gray-800 rounded-lg overflow-hidden">
-          <div class="bg-[#1a1a1a] px-4 py-1.5 text-xs text-gray-400 border-b border-gray-800 flex justify-between">
-            <span>${lang}</span>
-            <span>Code</span>
-          </div>
-          <pre class="hljs !bg-[#0a0a0a] !p-4 !m-0 text-sm overflow-x-auto"><code>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>
-        </div>`;
-      } catch (__) {}
+    const language = lang || 'text';
+    let highlightedCode;
+    try {
+      if (lang && hljs.getLanguage(lang)) {
+        highlightedCode = hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
+      } else {
+        highlightedCode = markdown.utils.escapeHtml(str);
+      }
+    } catch (__) {
+      highlightedCode = markdown.utils.escapeHtml(str);
     }
-    return `<pre class="hljs !bg-[#0a0a0a] !p-4 rounded-lg text-sm my-4 border border-gray-800"><code>${markdown.utils.escapeHtml(str)}</code></pre>`;
+
+    // Return the custom HTML structure with Copy Button
+    return `
+      <div class="code-wrapper group">
+        <div class="code-header">
+          <span>${language}</span>
+          <button class="copy-btn" data-code="${encodeURIComponent(str)}">
+            <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+        </div>
+        <pre class="hljs !bg-[#050505] !p-4 overflow-x-auto text-sm"><code>${highlightedCode}</code></pre>
+      </div>
+    `;
   },
 });
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
-
-// --- Identity Instruction ---
 const model = genAI.getGenerativeModel({ 
   model: "gemini-2.0-flash",
-  systemInstruction: "You are 'DataVoid AI', a sophisticated AI assistant created by the 'DataVoid Team'. You are helpful, precise, and secure. If asked about your underlying technology, simply state you are a model developed by DataVoid. Do not mention Google or Gemini unless explicitly asked about API architecture."
+  systemInstruction: "You are DataVoid AI, developed by the DataVoid Team. You are helpful, precise, and secure. Do not identify as Google Gemini."
 });
 
 let history = [];
 let isProcessing = false;
 
-// --- Elements ---
+// --- 2. DOM ELEMENTS ---
 const chatContainer = document.getElementById("chat-container");
 const chatForm = document.getElementById("chat-form");
 const promptInput = document.getElementById("prompt");
 const welcomeScreen = document.getElementById("welcome-screen");
 const clearBtn = document.getElementById("clear-btn");
-const suggestionBtns = document.querySelectorAll(".suggestion-btn");
+const sendBtn = document.getElementById("send-btn");
 
-// --- Components ---
-
-const userDiv = (text) => `
-  <div class="flex justify-end animate-fade-in pl-10">
-    <div class="bg-void-accent text-white max-w-full md:max-w-[80%] rounded-2xl rounded-tr-sm px-5 py-3.5 shadow-lg shadow-purple-900/10">
-      <div class="prose prose-invert prose-sm max-w-none font-sans leading-relaxed whitespace-pre-wrap">${markdown.utils.escapeHtml(text)}</div>
-    </div>
-  </div>
-`;
-
-const aiDiv = (htmlContent) => `
-  <div class="flex justify-start animate-fade-in w-full pr-10">
-    <div class="flex gap-4 max-w-full md:max-w-[85%]">
-      <div class="flex-shrink-0 mt-1">
-        <img src="/chat-bot.jpg" alt="DataVoid" class="w-8 h-8 rounded-lg object-cover ring-1 ring-gray-800 shadow-lg">
-      </div>
-      <div class="text-gray-200 min-w-0 flex-1">
-        <div class="prose prose-invert prose-sm max-w-none font-sans leading-7 prose-headings:text-gray-100 prose-a:text-purple-400 hover:prose-a:text-purple-300 prose-strong:text-white">
-          ${htmlContent}
-        </div>
-      </div>
-    </div>
-  </div>
-`;
-
-const loadingDiv = () => `
-  <div id="loading-indicator" class="flex justify-start animate-fade-in w-full">
-    <div class="flex gap-4">
-      <div class="flex-shrink-0 mt-1">
-        <img src="/chat-bot.jpg" alt="DataVoid" class="w-8 h-8 rounded-lg object-cover ring-1 ring-gray-800">
-      </div>
-      <div class="flex items-center h-8">
-        <div class="flex space-x-1.5">
-          <div class="w-1.5 h-1.5 bg-void-accent rounded-full typing-dot"></div>
-          <div class="w-1.5 h-1.5 bg-void-accent rounded-full typing-dot"></div>
-          <div class="w-1.5 h-1.5 bg-void-accent rounded-full typing-dot"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-`;
-
-// --- Logic ---
+// --- 3. HELPER FUNCTIONS ---
 
 const scrollToBottom = () => {
   chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
 };
 
+// --- 4. GLOBAL EVENT DELEGATION FOR COPY BUTTONS ---
+// We attach this to document so it works for dynamically added buttons
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.copy-btn');
+  if (!btn) return;
+
+  const code = decodeURIComponent(btn.dataset.code);
+  try {
+    await navigator.clipboard.writeText(code);
+    
+    // Visual Feedback
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = `<svg class="copy-icon text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <span class="text-green-500">Copied!</span>`;
+    
+    setTimeout(() => {
+      btn.innerHTML = originalContent;
+    }, 2000);
+  } catch (err) {
+    console.error('Failed to copy:', err);
+  }
+});
+
+// --- 5. CHAT LOGIC (STREAMING) ---
+
 async function handleChat(userText) {
   if (isProcessing || !userText.trim()) return;
   isProcessing = true;
+  sendBtn.disabled = true;
 
-  // 1. Hide Welcome Screen
-  if (welcomeScreen && welcomeScreen.style.display !== 'none') {
-    welcomeScreen.style.display = 'none';
-  }
-
-  // 2. Reset Input
+  // UI Cleanup
+  if (welcomeScreen) welcomeScreen.style.display = 'none';
   promptInput.value = "";
   promptInput.style.height = "auto";
-  
-  // 3. Add User Message
-  chatContainer.insertAdjacentHTML('beforeend', userDiv(userText));
+
+  // 1. Add User Message
+  chatContainer.insertAdjacentHTML('beforeend', `
+    <div class="flex justify-end pl-10 animate-fade-in">
+      <div class="bg-void-accent text-white max-w-full md:max-w-[85%] rounded-2xl rounded-tr-sm px-5 py-3.5 shadow-lg">
+        <div class="prose prose-invert prose-sm font-sans whitespace-pre-wrap">${markdown.utils.escapeHtml(userText)}</div>
+      </div>
+    </div>
+  `);
   scrollToBottom();
 
-  // 4. Add Loading
-  chatContainer.insertAdjacentHTML('beforeend', loadingDiv());
+  // 2. Create Placeholder for AI Response
+  const aiMessageId = `ai-${Date.now()}`;
+  chatContainer.insertAdjacentHTML('beforeend', `
+    <div class="flex justify-start w-full pr-10 animate-fade-in mb-8" id="wrapper-${aiMessageId}">
+      <div class="flex gap-4 max-w-full md:max-w-[90%]">
+        <img src="/chat-bot.jpg" alt="AI" class="w-8 h-8 rounded-lg mt-1 border border-void-border flex-shrink-0">
+        <div class="flex-1 min-w-0">
+          <div id="${aiMessageId}" class="prose prose-invert prose-sm max-w-none font-sans leading-relaxed">
+            <span class="inline-block w-2 h-2 bg-void-accent rounded-full animate-pulse"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `);
   scrollToBottom();
+
+  const aiContentDiv = document.getElementById(aiMessageId);
+  let fullResponse = "";
 
   try {
     const chat = model.startChat({ history: history });
-    const result = await chat.sendMessage(userText);
-    const response = await result.response;
-    const text = response.text();
+    
+    // 3. Start Streaming Request
+    const result = await chat.sendMessageStream(userText);
+    
+    // 4. Process Stream
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      fullResponse += chunkText;
+      
+      // Render Markdown on the fly
+      // Note: Rerendering full markdown on every chunk ensures code blocks format correctly as they arrive
+      aiContentDiv.innerHTML = markdown.render(fullResponse);
+      scrollToBottom();
+    }
 
-    // 5. Update History
+    // Update History
     history.push(
       { role: "user", parts: [{ text: userText }] },
-      { role: "model", parts: [{ text: text }] }
+      { role: "model", parts: [{ text: fullResponse }] }
     );
 
-    // 6. Render Response
-    document.getElementById("loading-indicator").remove();
-    const renderedResponse = markdown.render(text);
-    chatContainer.insertAdjacentHTML('beforeend', aiDiv(renderedResponse));
-    
   } catch (error) {
     console.error(error);
-    const loader = document.getElementById("loading-indicator");
-    if(loader) loader.remove();
-    chatContainer.insertAdjacentHTML('beforeend', aiDiv(`<span class="text-red-400 bg-red-900/10 px-2 py-1 rounded border border-red-900/50">Error: ${error.message}</span>`));
+    aiContentDiv.innerHTML = `<div class="text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+      Error: ${error.message}. Please try again.
+    </div>`;
   }
 
-  scrollToBottom();
   isProcessing = false;
+  sendBtn.disabled = false;
   promptInput.focus();
 }
 
-// --- Event Listeners ---
+// --- 6. EVENT LISTENERS ---
 
 chatForm.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -161,12 +180,13 @@ promptInput.addEventListener("input", function() {
 });
 
 clearBtn.addEventListener("click", () => {
-  if (confirm("Reset current session?")) {
+  if (confirm("Clear conversation history?")) {
     location.reload();
   }
 });
 
-suggestionBtns.forEach(btn => {
+// Handle suggestions
+document.querySelectorAll(".suggestion-btn").forEach(btn => {
   btn.addEventListener('click', () => {
     const text = btn.querySelector('span:first-child').innerText;
     handleChat(text);
