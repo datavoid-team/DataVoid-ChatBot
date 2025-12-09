@@ -4,7 +4,6 @@ import hljs from "highlight.js";
 
 // --- 1. CONFIGURATION & MARKDOWN SETUP ---
 
-// Custom Markdown Renderer
 const markdown = md({
   html: true,
   linkify: true,
@@ -40,11 +39,12 @@ const markdown = md({
 const API_KEY = import.meta.env.VITE_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// --- FIX: Use Explicit Model Version ---
-// "gemini-1.5-flash-002" is the specific stable version ID. 
-// This resolves "Model Not Found" errors caused by general aliases.
+// --- FIX: Use Gemini 2.0 Flash Lite ---
+// gemini-1.5-flash is retired (Oct 2025).
+// gemini-2.0-flash standard often hits "Limit 0" on free tiers.
+// gemini-2.0-flash-lite-001 is the current stable, high-limit free model.
 const model = genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash-002", 
+  model: "gemini-2.0-flash-lite-001", 
   systemInstruction: "You are DataVoid AI, a helpful and secure assistant developed by the DataVoid Team. You are NOT Google Gemini. If asked who made you, answer 'The DataVoid Team'."
 });
 
@@ -155,8 +155,8 @@ async function handleChat(userText) {
   let fullResponse = "";
 
   try {
-    // History Truncation (Keep last 15 messages)
-    const limitedHistory = history.slice(-15);
+    // Optimization: History Truncation (Keep last 10 messages)
+    const limitedHistory = history.slice(-10);
 
     const chat = model.startChat({ history: limitedHistory });
     const result = await chat.sendMessageStream(userText);
@@ -181,11 +181,10 @@ async function handleChat(userText) {
     // Error Handling
     let errorMsg = `Error: ${error.message}`;
     
-    // Detect Specific Errors
     if (error.message.includes("429") || error.message.includes("Quota")) {
-      errorMsg = "⚠️ <strong>High Traffic:</strong> You are sending messages too quickly. Please wait 10 seconds.";
-    } else if (error.message.includes("Not Found") || error.message.includes("404")) {
-      errorMsg = "⚠️ <strong>Model Error:</strong> The AI model is currently unavailable. Please check your API key.";
+      errorMsg = "⚠️ <strong>High Traffic:</strong> The free API quota is full. Please wait 1 minute.";
+    } else if (error.message.includes("Not Found")) {
+      errorMsg = "⚠️ <strong>Model Error:</strong> The model version is unavailable. Please check API updates.";
     }
 
     aiContentDiv.innerHTML = `<div class="text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-sm">
