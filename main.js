@@ -4,7 +4,7 @@ import hljs from "highlight.js";
 
 // --- 1. CONFIGURATION & MARKDOWN SETUP ---
 
-// Custom Markdown Renderer (No changes to this section)
+// Custom Markdown Renderer
 const markdown = md({
   html: true,
   linkify: true,
@@ -40,16 +40,14 @@ const markdown = md({
 const API_KEY = import.meta.env.VITE_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// --- OPTIMIZATION 1: Use the High-Limit Model & System Instruction ---
-// gemini-1.5-flash has the highest free tier limits (15 RPM / 1500 RPD)
+// --- FIX: Use Explicit Model Version ---
+// "gemini-1.5-flash-002" is the specific stable version ID. 
+// This resolves "Model Not Found" errors caused by general aliases.
 const model = genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash", 
+  model: "gemini-1.5-flash-002", 
   systemInstruction: "You are DataVoid AI, a helpful and secure assistant developed by the DataVoid Team. You are NOT Google Gemini. If asked who made you, answer 'The DataVoid Team'."
 });
 
-// --- OPTIMIZATION 2: Remove "History Hack" ---
-// We no longer need to pre-seed the history because we are using systemInstruction above.
-// This saves tokens on every single request.
 let history = []; 
 let isProcessing = false;
 
@@ -157,9 +155,7 @@ async function handleChat(userText) {
   let fullResponse = "";
 
   try {
-    // --- OPTIMIZATION 3: History Truncation ---
-    // Only send the last 15 parts of history to prevent token overflow (TPM limits)
-    // This keeps the conversation memory short but prevents 429 errors on long chats.
+    // History Truncation (Keep last 15 messages)
     const limitedHistory = history.slice(-15);
 
     const chat = model.startChat({ history: limitedHistory });
@@ -182,25 +178,23 @@ async function handleChat(userText) {
   } catch (error) {
     console.error(error);
     
-    // --- OPTIMIZATION 4: Better Error Messages ---
+    // Error Handling
     let errorMsg = `Error: ${error.message}`;
-    let isRateLimit = error.message.includes("429") || error.message.includes("Quota");
-
-    if (isRateLimit) {
-      errorMsg = "⚠️ <strong>High Traffic (Rate Limit):</strong> You are sending messages too quickly. Please wait 10-20 seconds and try again.";
+    
+    // Detect Specific Errors
+    if (error.message.includes("429") || error.message.includes("Quota")) {
+      errorMsg = "⚠️ <strong>High Traffic:</strong> You are sending messages too quickly. Please wait 10 seconds.";
+    } else if (error.message.includes("Not Found") || error.message.includes("404")) {
+      errorMsg = "⚠️ <strong>Model Error:</strong> The AI model is currently unavailable. Please check your API key.";
     }
 
     aiContentDiv.innerHTML = `<div class="text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-sm">
       ${errorMsg}
     </div>`;
-
-    // If it's just a rate limit, let them click send again immediately
-    if (isRateLimit) sendBtn.disabled = false;
   }
 
   isProcessing = false;
-  if (!document.querySelector('.text-red-400')) sendBtn.disabled = false; // Keep disabled if fatal error, else enable
-  sendBtn.disabled = false; // Ensure button is always re-enabled
+  sendBtn.disabled = false;
   promptInput.focus();
 }
 
@@ -225,7 +219,7 @@ promptInput.addEventListener("input", function() {
 
 clearBtn.addEventListener("click", () => {
   if (confirm("Clear conversation history?")) {
-    history = []; // Reset to empty array
+    history = [];
     location.reload();
   }
 });
