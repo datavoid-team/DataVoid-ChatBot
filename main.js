@@ -44,7 +44,7 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 // gemini-2.0-flash standard often hits "Limit 0" on free tiers.
 // gemini-2.0-flash-lite-001 is the current stable, high-limit free model.
 const model = genAI.getGenerativeModel({ 
-  model: "gemini-2.0-flash-lite-001", 
+  model: "gemini-2.5-flash",
   systemInstruction: "You are DataVoid AI, a helpful and secure assistant developed by the DataVoid Team. You are NOT Google Gemini. If asked who made you, answer 'The DataVoid Team'."
 });
 
