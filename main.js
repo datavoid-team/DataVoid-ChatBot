@@ -4,7 +4,7 @@ import hljs from "highlight.js";
 
 // --- 1. CONFIGURATION & MARKDOWN SETUP ---
 
-// Custom Markdown Renderer to inject "Copy" buttons for CODE BLOCKS
+// Custom Markdown Renderer (No changes to this section)
 const markdown = md({
   html: true,
   linkify: true,
@@ -22,8 +22,6 @@ const markdown = md({
       highlightedCode = markdown.utils.escapeHtml(str);
     }
 
-    // Code Block HTML structure with Copy Button
-    // We use group/code to manage hover states specifically for the code block
     return `
       <div class="code-wrapper group/code">
         <div class="code-header">
@@ -42,25 +40,17 @@ const markdown = md({
 const API_KEY = import.meta.env.VITE_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// System Instructions (The "Soul" of the AI)
+// --- OPTIMIZATION 1: Use the High-Limit Model & System Instruction ---
+// gemini-1.5-flash has the highest free tier limits (15 RPM / 1500 RPD)
 const model = genAI.getGenerativeModel({ 
-  model: "gemini-2.0-flash",
-  systemInstruction: "You are DataVoid AI, a helpful and secure assistant developed by the DataVoid Team. You are NOT Google Gemini."
+  model: "gemini-1.5-flash", 
+  systemInstruction: "You are DataVoid AI, a helpful and secure assistant developed by the DataVoid Team. You are NOT Google Gemini. If asked who made you, answer 'The DataVoid Team'."
 });
 
-// History Pre-Seeding (The "Memory" Hack to force identity)
-const SYSTEM_PROMPT = [
-  {
-    role: "user",
-    parts: [{ text: "IMPORTANT: You are DataVoid AI. If asked who made you, answer 'The DataVoid Team'. Do not mention Google." }]
-  },
-  {
-    role: "model",
-    parts: [{ text: "Understood. I am DataVoid AI, developed by the DataVoid Team." }]
-  }
-];
-
-let history = [...SYSTEM_PROMPT];
+// --- OPTIMIZATION 2: Remove "History Hack" ---
+// We no longer need to pre-seed the history because we are using systemInstruction above.
+// This saves tokens on every single request.
+let history = []; 
 let isProcessing = false;
 
 // --- 2. DOM ELEMENTS ---
@@ -72,12 +62,10 @@ const clearBtn = document.getElementById("clear-btn");
 const sendBtn = document.getElementById("send-btn");
 
 // --- 3. HELPER FUNCTIONS ---
-
 const scrollToBottom = () => {
   chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: "smooth" });
 };
 
-// Reusable SVG Icon for Message Copy Buttons
 const copyIconSVG = `
 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -85,22 +73,19 @@ const copyIconSVG = `
 </svg>
 `;
 
-// --- 4. GLOBAL EVENT DELEGATION (HANDLES ALL CLICKS) ---
+// --- 4. GLOBAL EVENT DELEGATION ---
 document.addEventListener('click', async (e) => {
-  // A. Handle Code Block Copy
   const codeBtn = e.target.closest('.copy-btn');
   if (codeBtn) {
     handleCopy(codeBtn, decodeURIComponent(codeBtn.dataset.code));
     return;
   }
 
-  // B. Handle Message Bubble Copy
   const msgBtn = e.target.closest('.msg-copy-btn');
   if (msgBtn) {
     const targetId = msgBtn.dataset.target;
     const targetEl = document.getElementById(targetId);
     if (targetEl) {
-      // Logic: Clone the message, remove code block headers (so we don't copy the word "Copy"), then get text
       const clone = targetEl.cloneNode(true);
       clone.querySelectorAll('.code-header').forEach(el => el.remove());
       handleCopy(msgBtn, clone.innerText.trim());
@@ -108,15 +93,11 @@ document.addEventListener('click', async (e) => {
   }
 });
 
-// Shared Copy Logic with Visual Feedback
 async function handleCopy(btn, text) {
   try {
     await navigator.clipboard.writeText(text);
     const originalHTML = btn.innerHTML;
-    
-    // Change Icon to Green Checkmark
     btn.innerHTML = `<svg class="w-4 h-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-    
     setTimeout(() => {
       btn.innerHTML = originalHTML;
     }, 2000);
@@ -132,7 +113,6 @@ async function handleChat(userText) {
   isProcessing = true;
   sendBtn.disabled = true;
 
-  // UI Cleanup
   if (welcomeScreen) welcomeScreen.style.display = 'none';
   promptInput.value = "";
   promptInput.style.height = "auto";
@@ -177,15 +157,18 @@ async function handleChat(userText) {
   let fullResponse = "";
 
   try {
-    const chat = model.startChat({ history: history });
+    // --- OPTIMIZATION 3: History Truncation ---
+    // Only send the last 15 parts of history to prevent token overflow (TPM limits)
+    // This keeps the conversation memory short but prevents 429 errors on long chats.
+    const limitedHistory = history.slice(-15);
+
+    const chat = model.startChat({ history: limitedHistory });
     const result = await chat.sendMessageStream(userText);
     
     // 3. Process Stream
     for await (const chunk of result.stream) {
       const chunkText = chunk.text();
       fullResponse += chunkText;
-      
-      // Render Markdown on the fly (Renders full response every time to ensure HTML integrity)
       aiContentDiv.innerHTML = markdown.render(fullResponse);
       scrollToBottom();
     }
@@ -198,25 +181,36 @@ async function handleChat(userText) {
 
   } catch (error) {
     console.error(error);
-    aiContentDiv.innerHTML = `<div class="text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-      <strong>Error:</strong> ${error.message}. Please try again.
+    
+    // --- OPTIMIZATION 4: Better Error Messages ---
+    let errorMsg = `Error: ${error.message}`;
+    let isRateLimit = error.message.includes("429") || error.message.includes("Quota");
+
+    if (isRateLimit) {
+      errorMsg = "⚠️ <strong>High Traffic (Rate Limit):</strong> You are sending messages too quickly. Please wait 10-20 seconds and try again.";
+    }
+
+    aiContentDiv.innerHTML = `<div class="text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-sm">
+      ${errorMsg}
     </div>`;
+
+    // If it's just a rate limit, let them click send again immediately
+    if (isRateLimit) sendBtn.disabled = false;
   }
 
   isProcessing = false;
-  sendBtn.disabled = false;
+  if (!document.querySelector('.text-red-400')) sendBtn.disabled = false; // Keep disabled if fatal error, else enable
+  sendBtn.disabled = false; // Ensure button is always re-enabled
   promptInput.focus();
 }
 
 // --- 6. EVENT LISTENERS ---
 
-// Form Submit
 chatForm.addEventListener("submit", (e) => {
   e.preventDefault();
   handleChat(promptInput.value);
 });
 
-// Enter Key (Shift+Enter for newline)
 promptInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -224,21 +218,18 @@ promptInput.addEventListener("keydown", (e) => {
   }
 });
 
-// Auto-resize Input
 promptInput.addEventListener("input", function() {
   this.style.height = "auto";
   this.style.height = Math.min(this.scrollHeight, 200) + "px";
 });
 
-// Clear Chat (Resets to System Prompt)
 clearBtn.addEventListener("click", () => {
   if (confirm("Clear conversation history?")) {
-    history = [...SYSTEM_PROMPT]; 
+    history = []; // Reset to empty array
     location.reload();
   }
 });
 
-// Suggestion Buttons
 document.querySelectorAll(".suggestion-btn").forEach(btn => {
   btn.addEventListener('click', () => {
     const text = btn.querySelector('span:first-child').innerText;
